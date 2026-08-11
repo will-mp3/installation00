@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# SQLite vault index (generated per-vault, not portable)
+.vault-index.db
+
+# OS files
+.DS_Store
+
+# Editor
+*.swp
+*.swo
