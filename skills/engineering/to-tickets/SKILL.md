@@ -1,6 +1,6 @@
 ---
 name: to-tickets
-description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker.
+description: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the Obsidian vault's issue tracker — gated tickets marked blocked, frontier tickets ready to start.
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Break a plan, spec, or conversation into a set of **tickets** — tracer-bullet vertical slices, each declaring the tickets that **block** it.
 
-The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
+The issue tracker is the Obsidian vault, reached through the obsidian MCP tools (`create_issue`, `update_issue`, `list_issues`). Tickets belong to this repo's vault project — find it with `search_vault` or `list_notes`, or scaffold it with `create_project`.
 
 ## Process
 
@@ -55,12 +55,16 @@ Ask the user:
 
 Iterate until the user approves the breakdown.
 
-### 5. Publish the tickets to the configured tracker
+### 5. Publish the tickets to the vault
 
-Publish the approved tickets. **How** depends on the tracker `/setup-matt-pocock-skills` configured — the tickets are the same either way, only the shape of the blocking edges changes:
+Publish one issue per ticket via `create_issue`, in dependency order (blockers first) so each ticket's blocking edges can reference real `<project>#<id>` identifiers. The issue description follows the template below, with "Blocked by" listing the blocking issues' identifiers. The vault tracker has no native blocking links, so the edges live as text — and as status:
 
-- **Local files** → write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below — one ticket per file, never a single combined file.
-- **A real issue tracker (GitHub, Linear, …)** → publish one issue per ticket in dependency order (blockers first) so each ticket's blocking edges can reference real identifiers. Use the platform's native blocking / sub-issue relationship where it has one; otherwise set each ticket's "Blocked by" to the blocking issues. Apply the `ready-for-agent` triage label unless instructed otherwise — the tickets are agent-grabbable by construction.
+- A ticket with unfinished blockers → `update_issue` to status `blocked`.
+- A ticket with no blockers (or all blockers done) → leave at `not_started`; it's grabbable.
+
+When a blocker completes, unblock its dependents (`blocked` → `not_started`).
+
+If the obsidian MCP is unavailable, fall back to local files: one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order, using the local template below — one ticket per file, never a single combined file.
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
@@ -74,7 +78,7 @@ Do NOT close or modify any parent issue.
 
 **Blocked by:** the numbers/titles of the tickets that gate this one, or "None — can start immediately".
 
-**Status:** ready-for-agent
+**Status:** ready
 
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
