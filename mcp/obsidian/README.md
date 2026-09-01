@@ -27,7 +27,7 @@ Add the server to your MCP configuration. Create a `.mcp.json` file in your proj
   "mcpServers": {
     "obsidian": {
       "command": "node",
-      "args": ["/absolute/path/to/installation00/mcp/obsidian/dist/server.js"],
+      "args": ["/absolute/path/to/the-ark/mcp/obsidian/dist/server.js"],
       "env": {
         "VAULT_PATH": "/absolute/path/to/your/obsidian/vault"
       }
@@ -43,7 +43,7 @@ For development, you can use `tsx` to run TypeScript directly without building:
   "mcpServers": {
     "obsidian": {
       "command": "npx",
-      "args": ["tsx", "/absolute/path/to/installation00/mcp/obsidian/src/server.ts"],
+      "args": ["tsx", "/absolute/path/to/the-ark/mcp/obsidian/src/server.ts"],
       "env": {
         "VAULT_PATH": "/absolute/path/to/your/obsidian/vault"
       }

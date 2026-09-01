@@ -1,4 +1,4 @@
-# installation00
+# the-ark
 
 The Ark: Halo ring (agent harness) factory. Primary function is to destroy flood outbreaks (hand coding).
 
@@ -14,7 +14,7 @@ Both harnesses run the *same files* from this checkout via symlinks — `git pul
 
 ```bash
 git clone <this repo>
-cd installation00
+cd the-ark
 ./setup.sh
 ```
 

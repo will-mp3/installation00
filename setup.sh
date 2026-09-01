@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# installation00 bootstrap: clone → ./setup.sh → done.
+# the-ark bootstrap: clone → ./setup.sh → done.
 # Idempotent; safe to re-run any time. After the first run, `git pull` is
 # enough to update skills and global instructions (they're symlinks);
 # re-run this only when the MCP server code changes.
