@@ -6,6 +6,7 @@ Skills I use daily for code work.
 
 Reachable only when you type them (Claude Code: `disable-model-invocation: true`; Codex: `policy.allow_implicit_invocation: false` in `agents/openai.yaml`).
 
+- **[init-agents](./init-agents/SKILL.md)** — Stamp an AGENTS.md into the current repo from a template, tailored to what the repo actually contains, with a CLAUDE.md symlink for Claude Code.
 - **[grill-with-docs](./grill-with-docs/SKILL.md)** — Grilling session that also builds your project's domain model, sharpening terminology and updating `CONTEXT.md` and ADRs inline.
 - **[to-spec](./to-spec/SKILL.md)** — Turn the current conversation into a spec and publish it to the vault project's notes.
 - **[to-tickets](./to-tickets/SKILL.md)** — Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published as vault issues — gated tickets marked blocked, frontier tickets ready to start.

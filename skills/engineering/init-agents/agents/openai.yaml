@@ -1,0 +1,5 @@
+interface:
+  display_name: "Init Agents"
+  short_description: "Stamp a tailored AGENTS.md into this repo"
+policy:
+  allow_implicit_invocation: false

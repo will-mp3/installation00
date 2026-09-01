@@ -29,7 +29,8 @@ if command -v claude >/dev/null 2>&1; then
   # Re-adding is the idempotent update path; remove is allowed to fail when
   # the server isn't registered yet.
   run claude mcp remove --scope user obsidian >/dev/null 2>&1 || true
-  run claude mcp add --scope user --env "VAULT_PATH=$VAULT_PATH" obsidian -- node "$SERVER_JS"
+  # Name before -e: --env is variadic and would swallow a trailing name.
+  run claude mcp add --scope user obsidian -e "VAULT_PATH=$VAULT_PATH" -- node "$SERVER_JS"
   log "registered obsidian MCP with Claude Code (user scope), vault: $VAULT_PATH"
 
   # A legacy entry in ~/.claude/mcp.json would shadow or duplicate this one.
