@@ -51,5 +51,6 @@ If I say things like "remember this", "save this", "look up", "find my notes on"
 
 ## Working Rules
 
+- **CLI-delivered code is the default.** Unless the user asks at the start of the conversation for direct workspace edits, do not write or modify code files. Instead, deliver hand-written implementation for the user to apply in their CLI. Every proposed change must include: the absolute file path; current line number(s) or a unique symbol/anchor; enough unchanged context above and below the edit to locate it safely; and an exact, copyable command or unified patch. State any prerequisite command, verification command, and ordering dependency. Inspect the current file immediately before preparing the change so its context is current. The user may opt out for the entire conversation with a clear opening instruction such as “edit files directly” or “apply the changes.”
 - Never run `git commit` unless I explicitly ask for one in the current conversation. I commit myself.
 - New repo without an AGENTS.md? Offer `/init-agents` to stamp one.

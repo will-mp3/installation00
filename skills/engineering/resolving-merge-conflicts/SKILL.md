@@ -1,14 +1,14 @@
 ---
 name: resolving-merge-conflicts
-description: "Use when you need to resolve an in-progress git merge/rebase conflict."
+description: Resolve an in-progress git merge or rebase by tracing each conflict to both sides' intent and verifying the integrated result.
 ---
 
-1. **See the current state** of the merge/rebase. Check git history, and the conflicting files.
+# Resolving Merge Conflicts
 
-2. **Find the primary sources** for each conflict. Understand deeply why each change was made, and what the original intent was. Read the commit messages, check the PRs, check original issues/tickets.
+1. Inspect the repository state, conflict list, and history. Search the vault for the relevant issues, decisions, and specs.
+2. Read the primary source for each side of every conflict: the changed implementation, tests, commit context, and applicable requirements. Establish the intent before editing.
+3. Resolve one hunk at a time, preserving both compatible intents. When they conflict, choose the behavior consistent with the merge's approved goal and record the trade-off.
+4. Inspect the resulting implementation and run the relevant type, test, format, and security checks. Use `systematic-debugging` for unexpected failures.
+5. Leave the integration in the best verified state possible. Report exactly what remains for the user, including any required `git add`, `git merge --continue`, or `git rebase --continue` command.
 
-3. **Resolve each hunk.** Preserve both intents where possible. Where incompatible, pick the one matching the merge's stated goal and note the trade-off. Do **not** invent new behaviour. Always resolve; never `--abort`.
-
-4. Discover the project's **automated checks** and run them — typically typecheck, then tests, then format. Fix anything the merge broke.
-
-5. **Finish the merge/rebase.** Stage everything and commit. If rebasing, continue the rebase process until all commits are rebased.
+Never finalize a merge/rebase, commit, or push unless the user explicitly asks in this conversation.

@@ -1,17 +1,11 @@
-# Productivity
+# Productivity skills
 
-General workflow tools, not code-specific.
+## Model-invoked core
 
-## User-invoked
+- **[writing-for-agents](./writing-for-agents/SKILL.md)** — the reference for skills and other agent-consumed documents.
 
-Reachable only when you type them (Claude Code: `disable-model-invocation: true`; Codex: `policy.allow_implicit_invocation: false` in `agents/openai.yaml`).
+## User-invoked specialists
 
-- **[handoff](./handoff/SKILL.md)** — Compact the current conversation into a handoff document so another agent can continue the work.
-- **[teach](./teach/SKILL.md)** — Teach the user a new skill or concept over multiple sessions, using the current directory as a stateful teaching workspace.
-
-## Model-invoked
-
-Model- or user-reachable (rich trigger phrasing so the model can reach for them).
-
-- **[grilling](./grilling/SKILL.md)** — Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved.
-- **[writing-for-agents](./writing-for-agents/SKILL.md)** — Writing documents for agents: skills, AGENTS.md/CLAUDE.md, and any doc an agent reaches by a pointer.
+- **[grilling](./grilling/SKILL.md)** — stress-test a plan or decision through an interactive design tree.
+- **[handoff](./handoff/SKILL.md)** — create a compact continuation document after durable knowledge is captured in the vault.
+- **[teach](./teach/SKILL.md)** — run a stateful teaching workspace.
