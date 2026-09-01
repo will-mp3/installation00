@@ -1,0 +1,3 @@
+interface:
+  display_name: "Verify Before Done"
+  short_description: "Run verification and read output before claiming success"
