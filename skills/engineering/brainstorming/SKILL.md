@@ -92,12 +92,12 @@ your path and complete them in order.
 5. **Implement** — proceed with the normal development workflow (TDD applies); no plan document
 
 **Architectural:**
-1. **Explore project context** — check files, docs, recent commits
+1. **Explore project context** — search the vault; check files, docs, and recent commits
 2. **Offer the visual companion just-in-time** — NOT upfront. The first time a question would genuinely be clearer shown than described, offer it then (its own message); on approval its browser tab opens for you. If no visual question ever arises, never offer it. See the Visual Companion section below.
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save it as a vault project note using the vault template; create or update the related vault issue when the work must persist.
+6. **Write design doc** — save to `docs/the-ark/specs/YYYY-MM-DD-<topic>-design.md`.
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -203,8 +203,7 @@ is the whole process.
 
 **Documentation:**
 
-- Write the validated design as a vault project note using the appropriate template.
-- Create or update a vault issue when the work needs persistent tracking.
+- Write the validated design to `docs/the-ark/specs/YYYY-MM-DD-<topic>-design.md`.
 - Never commit or push unless the user explicitly asks in this conversation.
 
 **Spec Self-Review:**
@@ -220,7 +219,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "The spec is saved in the vault at `<path>`. Please review it and let me know if you want changes before we start the implementation plan."
+> "The spec is saved at `<path>`. Please review it and let me know if you want changes before we start the implementation plan."
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 

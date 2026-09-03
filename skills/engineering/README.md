@@ -1,6 +1,6 @@
 # Engineering skills
 
-This is a small local fork of selected Superpowers 6.3.0 workflows. The skills use the Obsidian vault for prior context, durable specs, and tracked work; they never authorize a commit or push.
+The Ark adapts selected engineering workflows to its vault-first context, repo-local specs and plans, and explicit commit/push authority.
 
 ## Model-invoked core
 
