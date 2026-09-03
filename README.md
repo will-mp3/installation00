@@ -7,7 +7,7 @@ Dotfiles for agent tooling. One repo that puts the same setup on every machine, 
 - **memory-layer MCP server** (`mcp/memory-layer/`) — persistent, token-efficient access to a markdown knowledge store, with hybrid search and issue tracking
 - **Skills** (`skills/`) — a curated engineering + productivity skill set, wired to the vault
 - **Global instructions** (`agents/AGENTS.global.md`) — one harness-neutral file serving Claude Code and Codex
-- **Status line** (`statusline/statusline.sh`) — branch, model, context and rate-limit bars, in both harnesses
+- **Status line** (`statusline/statusline.sh`) — branch, model, context and usage bars, in both harnesses
 
 Both harnesses run the *same files* from this checkout via symlinks — `git pull` updates everything, everywhere, at once.
 
@@ -90,13 +90,15 @@ tail -f ~/Library/Logs/the-ark-ollama.log
 
 ## Status line
 
-Both harnesses show `branch · model · context · 5-hour limit`. This is the one piece of the ark
-that cannot be a single shared file, because the two take opposite shapes.
+Both harnesses show `branch · model · context · 5-hour limit · weekly limit`. This is the one
+piece of the ark that cannot be a single shared file, because the two take opposite shapes.
 
 **Claude Code** runs an arbitrary command and renders its stdout, so it gets
-`statusline/statusline.sh` — `branch | model | ctx: [bar] % | rate: [bar] %`, bars going green →
-yellow → red as they fill. `setup.sh` symlinks it to `~/.claude/ark-statusline` and points
-`settings.json` at that shim, so edits ship on `git pull` without re-running setup. An existing
+`statusline/statusline.sh` — `branch | model | ctx: [bar] % | 5h: [bar] % | wk: [bar] %`, bars
+going green → yellow → red as they fill. Two usage windows rather than one: the 5-hour limit is
+what throttles a working session, the weekly one is what runs out mid-week.
+
+`setup.sh` symlinks it to `~/.claude/ark-statusline` and points `settings.json` at that shim, so edits ship on `git pull` without re-running setup. An existing
 *custom* `statusLine` is left alone and reported rather than overwritten.
 
 Its one dependency is `jq`, which macOS has shipped at `/usr/bin/jq` since Ventura. Without it
@@ -104,17 +106,35 @@ the line degrades to a visible reminder instead of rendering blank.
 
 **Codex** has no command hook. Its status line is a picker over a fixed vocabulary of items,
 chosen with `/statusline` in the TUI and stored as `[tui].status_line` in `config.toml`. So it
-cannot run the script; `setup.sh` writes the item set that renders the same four fields:
+cannot run the script; `setup.sh` writes the item set that renders the same fields:
 
 ```toml
 [tui]
-status_line = ["git-branch", "model", "context-used", "five-hour-limit"]
+status_line = ["git-branch", "model", "context-used", "five-hour-limit", "weekly-limit"]
 ```
 
-A `status_line` you have already set is never overwritten. The vocabulary is much larger than
-the four above — `context-remaining`, `weekly-limit`, `used-tokens`, `task-progress`,
+A `status_line` you have already set is never overwritten (an item set a previous ark version
+wrote is upgraded, since that one is ours). The vocabulary is much larger than the five above —
+`context-remaining`, `used-tokens`, `task-progress`,
 `thread-credits`, `estimated-thread-cost`, `approval-mode`, `fast-mode`, `pull-request-number`
 and more. Run `/statusline` to browse and change it; the same ids also drive `[tui].terminal_title`.
+
+## Never approving vault tools
+
+A knowledge store you have to click "allow" on is a knowledge store agents stop reaching for, so
+`setup.sh` pre-approves the whole server in both harnesses:
+
+- **Claude Code** — `mcp__memory-layer__*` in `permissions.allow`. The trailing `__*` is
+  required, not decoration: Claude Code compares `mcp__<server>` as an exact string, so on its
+  own it matches nothing. The wildcard also covers tools added to the server later, which an
+  enumerated list would not — setup replaces any per-tool rules it supersedes.
+- **Codex** — `default_tools_approval_mode = "auto"` on `[mcp_servers.memory-layer]`. Set on the
+  server rather than per tool, for the same reason. The accepted values are `auto`, `prompt`,
+  `writes` and `approve`; without this, every `search_vault` call opens an approval dialog.
+  It is written *after* `codex mcp add`, which rewrites the whole server table and would
+  otherwise drop it — so it is re-applied on each run by design.
+
+Both are skipped if you have set your own value.
 
 ## Upgrading from the `obsidian` name
 

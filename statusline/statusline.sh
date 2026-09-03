@@ -71,22 +71,34 @@ pct_segment() {
   printf '[%s] %s%s%%%s' "$bar" "$color" "$int" "$RESET"
 }
 
-# One jq pass, not three — this runs on every render.
-# .rate_limits is present for Claude.ai subscribers only; absent for API-key
-# users and before the first API call, which reads as an empty field here.
-IFS=$'\t' read -r model ctx_pct rate_pct < <(
-  printf '%s' "$input" | jq -r '
-    [ .model.display_name // "?",
-      (.context_window.used_percentage // "" | tostring),
-      (.rate_limits.five_hour.used_percentage // "" | tostring)
-    ] | @tsv'
-)
+# One jq call per field, deliberately. Batching all three into a single `@tsv`
+# pass is faster and WRONG: tab is an IFS *whitespace* character, so bash
+# collapses a run of them into one delimiter. Any absent field then shifts every
+# later value one slot left — .context_window is absent until the first API
+# response lands, so a fresh session rendered the rate-limit number as the
+# context number, in the rate bar's red, and showed "?" for the rate.
+# Three reads cannot shift. The extra few milliseconds are not worth the class
+# of bug.
+#
+# .context_window is absent early in a session; .rate_limits is present for
+# Claude.ai subscribers only, absent for API-key users. `// empty` yields an
+# empty string for both, which pct_segment renders as "?". A real 0 survives —
+# 0 is truthy in jq, so `0 // empty` is 0, not empty.
+jq_field() { printf '%s' "$input" | jq -r "$1"; }
+
+model=$(jq_field '.model.display_name // "?"')
+ctx_pct=$(jq_field '.context_window.used_percentage // empty')
+five_h_pct=$(jq_field '.rate_limits.five_hour.used_percentage // empty')
+week_pct=$(jq_field '.rate_limits.seven_day.used_percentage // empty')
 
 ctx_seg=$(pct_segment "$ctx_pct" 30 50)
-rate_seg=$(pct_segment "$rate_pct" 33 66)
+five_h_seg=$(pct_segment "$five_h_pct" 33 66)
+week_seg=$(pct_segment "$week_pct" 33 66)
 
+# Two usage windows, labelled rather than both called "rate": the 5-hour limit
+# is what throttles a working session, the weekly one is what runs out mid-week.
 if [ -n "$branch" ]; then
-  printf '%s | %s | ctx: %s | rate: %s' "$branch" "$model" "$ctx_seg" "$rate_seg"
+  printf '%s | %s | ctx: %s | 5h: %s | wk: %s' "$branch" "$model" "$ctx_seg" "$five_h_seg" "$week_seg"
 else
-  printf '%s | ctx: %s | rate: %s' "$model" "$ctx_seg" "$rate_seg"
+  printf '%s | ctx: %s | 5h: %s | wk: %s' "$model" "$ctx_seg" "$five_h_seg" "$week_seg"
 fi

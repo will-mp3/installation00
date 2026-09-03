@@ -57,5 +57,5 @@ if [ "${DRY_RUN:-0}" = "1" ]; then
   printf '\033[2m[dry-run]\033[0m set [tui].status_line in %s\n' "$CODEX_CONFIG"
 else
   run mkdir -p "$HOME/.codex"
-  node "$REPO/scripts/merge-codex-statusline.mjs" "$CODEX_CONFIG"
+  node "$REPO/scripts/merge-codex-config.mjs" --statusline "$CODEX_CONFIG"
 fi

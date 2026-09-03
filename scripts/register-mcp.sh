@@ -49,6 +49,14 @@ if command -v claude >/dev/null 2>&1; then
     warn "~/.claude/settings.json still has mcp__${LEGACY_NAME}__* permission rules."
     warn "  Tool ids are now mcp__${SERVER_NAME}__* — update or drop the stale rules."
   fi
+
+  # Pre-approve the vault tools so no session stops to ask for them.
+  if [ "$DRY_RUN" = "1" ]; then
+    printf '\033[2m[dry-run]\033[0m allow mcp__%s__* in %s\n' "$SERVER_NAME" "$HOME/.claude/settings.json"
+  else
+    run mkdir -p "$HOME/.claude"
+    node "$REPO/scripts/merge-claude-settings.mjs" --permissions "$HOME/.claude/settings.json"
+  fi
 else
   warn "claude CLI not found — skipping Claude Code registration"
 fi
@@ -59,6 +67,16 @@ if command -v codex >/dev/null 2>&1; then
   run codex mcp remove "$SERVER_NAME" >/dev/null 2>&1 || true
   run codex mcp add "$SERVER_NAME" --env "VAULT_PATH=$VAULT_PATH" -- node "$SERVER_JS"
   log "registered $SERVER_NAME MCP with Codex, store: $VAULT_PATH"
+
+  # Without this, every vault tool call opens an "Allow the memory-layer MCP
+  # server to run tool X?" prompt. Set on the server rather than per tool, so
+  # tools added later are covered too. Must run AFTER `codex mcp add`, which
+  # rewrites the whole [mcp_servers.<name>] table and would drop the key.
+  if [ "$DRY_RUN" = "1" ]; then
+    printf '\033[2m[dry-run]\033[0m set [mcp_servers.%s].default_tools_approval_mode\n' "$SERVER_NAME"
+  else
+    node "$REPO/scripts/merge-codex-config.mjs" --mcp-approval "$HOME/.codex/config.toml"
+  fi
 
   # `codex mcp remove` drops [mcp_servers.obsidian] but not the per-tool
   # [mcp_servers.obsidian.tools.*] approval blocks underneath it.
