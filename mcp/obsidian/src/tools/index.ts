@@ -79,13 +79,22 @@ function walkAllMd(dir: string, base: string): string[] {
 
 export async function reindexVault(
   vaultPath: string
-): Promise<{ indexed: number; skipped: number; removed: number; issuesRebuilt: number }> {
+): Promise<{
+  indexed: number;
+  skipped: number;
+  removed: number;
+  issuesRebuilt: number;
+  repaired: number;
+  missingVectors: number;
+}> {
   const allFiles = walkAllMd(vaultPath, vaultPath);
   const fileSet = new Set(allFiles);
 
   let indexed = 0;
   let skipped = 0;
   let removed = 0;
+  let repaired = 0;       // notes that were current but had lost their vector
+  let missingVectors = 0; // notes still without a vector after this pass
 
   // Remove stale entries for files that no longer exist on disk
   const indexedPaths = allIndexedPaths(vaultPath);
@@ -104,6 +113,11 @@ export async function reindexVault(
       deleteVector(vaultPath, p);
     }
   }
+
+  // Which notes currently have an embedding. A note indexed while Ollama was
+  // down has an FTS row and a recorded mtime but no vector, so mtime alone
+  // cannot tell us the index is complete — see the skip check below.
+  const vectorSet = new Set(vectorPaths);
 
   // Rebuild issues table from disk
   const issues: Issue[] = [];
@@ -124,7 +138,12 @@ export async function reindexVault(
 
     const storedMtime = getMtime(vaultPath, relPath);
 
-    if (storedMtime !== null && fileMtime <= storedMtime) {
+    // Unchanged since the last pass AND already embedded. Dropping the vector
+    // half of this check is what used to make downtime permanent: the file
+    // looked current, so every later reindex skipped it and the missing vector
+    // was never backfilled.
+    const contentCurrent = storedMtime !== null && fileMtime <= storedMtime;
+    if (contentCurrent && vectorSet.has(relPath)) {
       skipped++;
       continue;
     }
@@ -135,13 +154,21 @@ export async function reindexVault(
 
     upsertFTS(vaultPath, relPath, title, plain, fileMtime);
 
-    const embedding = await embed(plain);
+    // An empty note has no meaningful vector, and counting it as missing would
+    // leave the reindex permanently reporting a failure that cannot be fixed.
+    const hasContent = plain.trim().length > 0;
+    const embedding = hasContent ? await embed(plain) : null;
     if (embedding) {
       upsertVector(vaultPath, relPath, embedding);
+      if (contentCurrent) repaired++;
+    } else if (hasContent) {
+      // Ollama unavailable. The note stays searchable by FTS, and the next
+      // reindex will retry it because vectorSet will still not contain it.
+      missingVectors++;
     }
 
     indexed++;
   }
 
-  return { indexed, skipped, removed, issuesRebuilt };
+  return { indexed, skipped, removed, issuesRebuilt, repaired, missingVectors };
 }

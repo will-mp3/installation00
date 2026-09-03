@@ -22,7 +22,8 @@ That's it. The script is idempotent — re-run it any time. It will:
 
 1. Check prerequisites (Node 18+, git)
 2. Build the MCP server
-3. Install/start Ollama and pull the embedding model (never fatal — search degrades to FTS-only without it)
+3. Install Ollama, install a launchd agent that keeps it running, and pull the embedding model
+   (never fatal — search degrades to FTS-only without it)
 4. Symlink every skill into `~/.claude/skills` (Claude Code) and `~/.agents/skills` (Codex)
 5. Symlink `agents/AGENTS.global.md` to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` (existing real files are backed up to `.bak`)
 6. Register the MCP server with both harness CLIs
@@ -56,6 +57,30 @@ agents/
   AGENTS.global.md  # the shared global instructions file
 hooks/
   codex-hooks.json  # symlinked to ~/.codex/hooks.json
+```
+
+## Search uptime
+
+Semantic search needs Ollama on `localhost:11434`. A backgrounded `ollama serve` dies at
+logout, so `setup.sh` installs a launchd agent instead — `~/Library/LaunchAgents/com.the-ark.ollama.plist`,
+with `RunAtLoad` and `KeepAlive`, so it starts at login and restarts within seconds if it
+crashes or is killed.
+
+FTS is a deliberate fallback, not an equivalent, so degradation is never silent:
+
+- `search_vault` returns a `warning` field when Ollama is unreachable, saying the results are
+  full-text only.
+- `reindex_vault` reports how many notes still have no embedding, and backfills any it can.
+
+A note written while Ollama was down keeps its FTS row and an up-to-date mtime but has no
+vector. `reindex_vault` therefore checks for a missing embedding as well as a stale mtime —
+without that, the mtime alone made such a note look current and it was skipped forever.
+
+Check on it:
+
+```bash
+launchctl print gui/$(id -u)/com.the-ark.ollama | grep -E 'state|pid'
+tail -f ~/Library/Logs/the-ark-ollama.log
 ```
 
 ## Daily use

@@ -5,6 +5,7 @@ import fs from "fs";
 
 import { readNote, writeNote, updateNote } from "./tools/notes.js";
 import { searchVault } from "./tools/search.js";
+import { isOllamaAvailable } from "./embeddings/ollama.js";
 import { listNotes, moveNote } from "./tools/navigation.js";
 import { createProject } from "./tools/projects.js";
 import { reindexVault } from "./tools/index.js";
@@ -74,8 +75,23 @@ server.tool(
   },
   async ({ query, limit }) => {
     const results = await searchVault(VAULT_PATH, query, limit);
+
+    // FTS is a deliberate fallback, not an equivalent. Say so out loud rather
+    // than returning thinner results that look like a complete answer.
+    const payload = isOllamaAvailable()
+      ? results
+      : {
+          warning:
+            "DEGRADED: semantic search is unavailable (Ollama not reachable at " +
+            "http://localhost:11434). These are full-text matches only, so " +
+            "conceptually-related notes that share no keywords are missing. " +
+            "Restart Ollama, then run reindex_vault to backfill anything " +
+            "written while it was down.",
+          results,
+        };
+
     return {
-      content: [{ type: "text", text: JSON.stringify(results, null, 2) }],
+      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
     };
   }
 );
@@ -128,7 +144,17 @@ server.tool(
       content: [
         {
           type: "text",
-          text: `Reindex complete: ${result.indexed} indexed, ${result.skipped} skipped, ${result.removed} stale entries removed, ${result.issuesRebuilt} issues rebuilt`,
+          text:
+            `Reindex complete: ${result.indexed} indexed, ${result.skipped} skipped, ` +
+            `${result.removed} stale entries removed, ${result.issuesRebuilt} issues rebuilt` +
+            (result.repaired > 0
+              ? `, ${result.repaired} missing embeddings backfilled`
+              : "") +
+            (result.missingVectors > 0
+              ? `\nWARNING: ${result.missingVectors} note(s) still have no embedding because ` +
+                `Ollama was unreachable. They are findable by full-text search only. ` +
+                `Start Ollama and re-run reindex_vault to repair them.`
+              : ""),
         },
       ],
     };
