@@ -80,17 +80,59 @@ if pgrep -f "ollama serve" >/dev/null 2>&1 && ! launchctl print "gui/$(id -u)/$A
   sleep 2
 fi
 
-# bootout then bootstrap is the idempotent reload; both are allowed to fail
-# (nothing loaded yet, or an older macOS without the modern subcommands).
+# bootout then bootstrap is the idempotent reload, but neither call can be taken
+# at face value:
+#
+#   - `bootout` returns 0 immediately and tears the job down *asynchronously*.
+#     The service lingers in `state = SIGTERMed` until the process actually
+#     exits. A warm ollama (embedding model resident in GPU memory) is slow
+#     enough here that a `bootstrap` fired right after hits the still-present
+#     job and fails with "Bootstrap failed: 5: Input/output error".
+#   - The legacy `launchctl load -w` fallback fails the same way but still
+#     **exits 0**, so a `|| warn` guard on it never fires.
+#
+# Together those silently un-installed the agent: teardown finished, the service
+# was removed, nothing reloaded it, and the only symptom was search dropping to
+# FTS-only. So wait for the job to be genuinely gone, then load, then verify —
+# exit codes decide nothing here, observed state does.
+#
 # Not routed through run(): these need their own output suppressed, which would
 # also swallow run()'s dry-run notice and hide the step from --dry-run.
+
+agent_loaded() { launchctl print "gui/$(id -u)/$AGENT_LABEL" >/dev/null 2>&1; }
+
+# Poll rather than sleep a fixed amount: teardown takes ~0s cold and seconds warm.
+wait_agent_gone() {
+  for _ in $(seq 1 30); do
+    agent_loaded || return 0
+    sleep 1
+  done
+  return 1
+}
+
+# Each attempt fully unloads before loading, so a subsequent agent_loaded check
+# is unambiguous — a lingering SIGTERMed job would otherwise read as success.
+reload_agent() {
+  for _ in 1 2 3; do
+    launchctl bootout "gui/$(id -u)/$AGENT_LABEL" >/dev/null 2>&1 || true
+    wait_agent_gone || { warn "$AGENT_LABEL is still unloading — retrying"; continue; }
+    launchctl bootstrap "gui/$(id -u)" "$AGENT_PLIST" >/dev/null 2>&1 \
+      || launchctl load -w "$AGENT_PLIST" >/dev/null 2>&1 \
+      || true
+    agent_loaded && return 0
+    sleep 2
+  done
+  return 1
+}
+
 if [ "${DRY_RUN:-0}" = "1" ]; then
-  printf '\033[2m[dry-run]\033[0m launchctl bootout + bootstrap %s\n' "$AGENT_LABEL"
+  printf '\033[2m[dry-run]\033[0m reload launchd agent %s\n' "$AGENT_LABEL"
+elif reload_agent; then
+  log "launchd agent $AGENT_LABEL loaded"
 else
-  launchctl bootout "gui/$(id -u)/$AGENT_LABEL" >/dev/null 2>&1 || true
-  if ! launchctl bootstrap "gui/$(id -u)" "$AGENT_PLIST" >/dev/null 2>&1; then
-    launchctl load -w "$AGENT_PLIST" >/dev/null 2>&1 || warn "could not load $AGENT_LABEL"
-  fi
+  warn "could not load $AGENT_LABEL — ollama will not be kept running,"
+  warn "  so semantic search will drop to FTS-only after this session."
+  warn "  Try by hand: launchctl bootstrap gui/$(id -u) $AGENT_PLIST"
 fi
 
 # Give it a few seconds to come up.
