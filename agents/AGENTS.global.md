@@ -53,7 +53,7 @@ If I say things like "remember this", "save this", "look up", "find my notes on"
 ## Working Rules
 
 - **Tool output stays internal.** Never return raw tool output to the conversation. Shape every shell, MCP, browser, and file-read call to emit only the smallest fact needed—use targeted queries, narrow line ranges, explicit result limits, and bounded output. Do not dump whole files, skills, diffs, logs, directory listings, tool schemas, or command help. When broader inspection is needed, inspect it in small capped chunks and give the user a concise synthesis instead.
-- Never run `git commit` unless I explicitly ask for one in the current conversation. I commit myself.
+- Never run `git commit` unless I explicitly ask for one in the current conversation. I commit myself. If you are asked to commit, or run any git commands, never sign the commits.
 - New repo without an AGENTS.md? Offer `/init-agents` to stamp one.
 
 ## Code Quality
