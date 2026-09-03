@@ -1,23 +1,61 @@
 ---
 name: executing-plans
-description: Use when executing an approved written implementation plan.
+description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
 ---
 
 # Executing Plans
 
-Execute an approved plan deliberately, keeping its evidence and durable state current.
+## Overview
 
-## Process
+Load plan, review critically, execute all tasks, report when complete.
 
-1. Load the plan, relevant vault notes/issues, project instructions, and `docs/BEST_PRACTICES.md` when present. Inspect the current implementation before changing code or tests.
-2. Critically review the plan against the current worktree. Raise material ambiguity, drift, or safety concerns before proceeding; update the vault plan or issue when the decision changes.
-3. Work one task at a time. Reuse project abstractions; retain strict types; follow the project's security, accessibility, and performance conventions; write comments for why, not narration.
-4. For each behavior change, use `test-driven-development`. For failures or unexpected behavior, use `systematic-debugging` before proposing a fix.
-5. Run the task's stated checks, record meaningful discoveries in the vault, and keep persistent issues accurate. Do not mark an issue done until its completion criterion is met.
-6. Review the completed diff with `code-review`, then use `verification-before-completion` before reporting success.
+**Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-## Guardrails
+## The Process
 
-- Work in the current workspace unless the user explicitly requests a different arrangement.
-- Do not delegate by default; use a single focused execution path.
+### Step 1: Load and Review Plan
+1. Work in the current workspace unless the user requests otherwise.
+2. Load the plan and related vault notes/issues; read `docs/BEST_PRACTICES.md` when present.
+3. Review critically and inspect the current implementation before changing code or tests.
+4. If concerns: raise them with your human partner before starting.
+5. If no concerns: create todos for the plan items and proceed.
+
+### Step 2: Execute Tasks
+
+For each task:
+1. Mark as in_progress
+2. Follow each step exactly (plan has bite-sized steps)
+3. Run verifications as specified
+4. Mark as completed
+
+### Step 3: Complete Development
+
+After all tasks complete and verified:
+- Run the plan's stated checks, then use `code-review` and `verification-before-completion` before reporting completion.
 - Never commit or push unless the user explicitly asks in this conversation.
+
+## When to Stop and Ask for Help
+
+**STOP executing immediately when:**
+- Hit a blocker (missing dependency, test fails, instruction unclear)
+- Plan has critical gaps preventing starting
+- You don't understand an instruction
+- Verification fails repeatedly
+
+**Ask for clarification rather than guessing.**
+
+## When to Revisit Earlier Steps
+
+**Return to Review (Step 1) when:**
+- Partner updates the plan based on your feedback
+- Fundamental approach needs rethinking
+
+**Don't force through blockers** - stop and ask.
+
+## Remember
+- Review plan critically first
+- Follow plan steps exactly
+- Don't skip verifications
+- Reference skills when plan says to
+- Stop when blocked, don't guess
+- Never start implementation on main/master branch without explicit user consent
