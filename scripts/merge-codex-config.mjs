@@ -5,11 +5,21 @@
 //                   like Claude Code's but a picker over a fixed item
 //                   vocabulary (`/statusline` in the TUI), so it gets the item
 //                   set that renders the same fields as statusline/statusline.sh.
-//   --mcp-approval  [mcp_servers.<server>].default_tools_approval_mode = "auto"
+//   --mcp-approval  [mcp_servers.<server>].default_tools_approval_mode = "approve"
 //                   — otherwise every vault tool call opens an "Allow the
 //                   memory-layer MCP server to run tool X?" prompt. Set on the
 //                   server, not per tool, so tools added later are covered too.
-//                   Valid values are auto | prompt | writes | approve.
+//
+//                   The four values are auto | prompt | writes | approve, and
+//                   "approve" reads backwards: it means *pre-approved*, not
+//                   "ask for approval" — it is what Codex writes when you pick
+//                   "Allow and don't ask me again" in the dialog. "auto" is the
+//                   one that still prompts here: it derives the decision from
+//                   the tool's MCP annotations (read_only_hint /
+//                   destructive_hint / open_world_hint), and this server
+//                   declares none, so nothing can be inferred and everything
+//                   asks. Verified with `codex exec`: "auto" fails the call
+//                   with "MCP tool call requires approval", "approve" runs it.
 //
 // With neither flag, both are written.
 //
@@ -135,7 +145,7 @@ if (doStatusLine) {
 }
 
 if (doMcpApproval) {
-  setKey(`mcp_servers.${SERVER}`, "default_tools_approval_mode", '"auto"');
+  setKey(`mcp_servers.${SERVER}`, "default_tools_approval_mode", '"approve"');
 }
 
 if (changed) {

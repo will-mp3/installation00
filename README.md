@@ -128,11 +128,20 @@ A knowledge store you have to click "allow" on is a knowledge store agents stop 
   required, not decoration: Claude Code compares `mcp__<server>` as an exact string, so on its
   own it matches nothing. The wildcard also covers tools added to the server later, which an
   enumerated list would not — setup replaces any per-tool rules it supersedes.
-- **Codex** — `default_tools_approval_mode = "auto"` on `[mcp_servers.memory-layer]`. Set on the
-  server rather than per tool, for the same reason. The accepted values are `auto`, `prompt`,
-  `writes` and `approve`; without this, every `search_vault` call opens an approval dialog.
-  It is written *after* `codex mcp add`, which rewrites the whole server table and would
-  otherwise drop it — so it is re-applied on each run by design.
+- **Codex** — `default_tools_approval_mode = "approve"` on `[mcp_servers.memory-layer]`. Set on
+  the server rather than per tool, for the same reason. It is written *after* `codex mcp add`,
+  which rewrites the whole server table and would otherwise drop it — so it is re-applied on
+  each run by design.
+
+  The four values are `auto`, `prompt`, `writes`, `approve`, and **`approve` reads backwards**:
+  it means *pre-approved*, not "ask for approval" — it is what Codex writes when you pick
+  "Allow and don't ask me again". `auto` is the one that still prompts here: it derives the
+  decision from the tool's MCP annotations (`read_only_hint`, `destructive_hint`,
+  `open_world_hint`), and this server declares none, so nothing can be inferred and everything
+  asks.
+
+  Note `approval_policy = "never"` does *not* help — an MCP call that needs approval then fails
+  outright with `MCP tool call requires approval, but approval policy is never`.
 
 Both are skipped if you have set your own value.
 
