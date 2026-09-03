@@ -9,24 +9,24 @@ If you were dispatched as a subagent to execute a specific task, ignore this ski
 </SUBAGENT-STOP>
 
 <EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+If a skill directly matches the user's request or the user names it, invoke it.
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+Do not invoke a skill for a self-contained question, status check, or narrow task solely because it might apply.
 
 This is not negotiable. You cannot rationalize your way out of this.
 </EXTREMELY-IMPORTANT>
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+**Invoke directly relevant or requested skills BEFORE any response or action.** Do not load a workflow merely to confirm that it is unnecessary.
 
 **Before entering plan mode:** if you haven't already brainstormed, invoke the brainstorming skill first.
 
 Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.
 
-## Search The Vault First
+## Search The Vault When Relevant
 
-The memory layer is the memory that outlives this session. Before acting on a task or question, `search_vault` for prior decisions, specs, issues, and research — then build on what you find instead of starting cold. Capture what you learn as you go, not just at the end.
+The memory layer outlives this session. Search it when stored decisions, specs, issues, or research could materially improve the work. Use excerpts first; read a full note only when necessary. Capture durable knowledge, not transient progress.
 
 ## Skill Priority
 
