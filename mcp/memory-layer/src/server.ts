@@ -35,6 +35,7 @@ server.tool(
   "read_note",
   "Read a note by path relative to vault root",
   { path: z.string().describe("Note path relative to vault root, e.g. 'notes/my-note.md'") },
+  { readOnlyHint: true },
   async ({ path: notePath }) => ({
     content: [{ type: "text", text: await readNote(VAULT_PATH, notePath) }],
   })
@@ -47,6 +48,7 @@ server.tool(
     path: z.string().describe("Note path relative to vault root"),
     content: z.string().describe("Markdown content for the note"),
   },
+  { destructiveHint: false },
   async ({ path: notePath, content }) => ({
     content: [{ type: "text", text: await writeNote(VAULT_PATH, notePath, content) }],
   })
@@ -61,6 +63,7 @@ server.tool(
     mode: z.enum(["append", "prepend", "replace-section"]).describe("How to apply the update"),
     section: z.string().optional().describe("Section heading name (required for replace-section mode)"),
   },
+  { destructiveHint: false },
   async ({ path: notePath, content, mode, section }) => ({
     content: [{ type: "text", text: await updateNote(VAULT_PATH, notePath, content, mode, section) }],
   })
@@ -73,6 +76,7 @@ server.tool(
     query: z.string().describe("Search query"),
     limit: z.number().optional().default(5).describe("Max results to return (default 5)"),
   },
+  { readOnlyHint: true },
   async ({ query, limit }) => {
     const results = await searchVault(VAULT_PATH, query, limit);
 
@@ -103,6 +107,7 @@ server.tool(
     folder: z.string().optional().default("").describe("Folder path relative to vault root (default: root)"),
     recursive: z.boolean().optional().default(false).describe("Include subfolders"),
   },
+  { readOnlyHint: true },
   async ({ folder, recursive }) => {
     const notes = await listNotes(VAULT_PATH, folder, recursive);
     return {
@@ -118,6 +123,7 @@ server.tool(
     from: z.string().describe("Current path relative to vault root"),
     to: z.string().describe("New path relative to vault root"),
   },
+  { destructiveHint: false },
   async ({ from, to }) => ({
     content: [{ type: "text", text: await moveNote(VAULT_PATH, from, to) }],
   })
@@ -129,6 +135,7 @@ server.tool(
   {
     name: z.string().describe("Project name"),
   },
+  { destructiveHint: false },
   async ({ name }) => ({
     content: [{ type: "text", text: await createProject(VAULT_PATH, name) }],
   })
@@ -138,6 +145,7 @@ server.tool(
   "reindex_vault",
   "Full vault crawl: rebuild FTS5 and vector index, skipping unchanged files. Removes stale entries for deleted files",
   {},
+  { destructiveHint: false },
   async () => {
     const result = await reindexVault(VAULT_PATH);
     return {
@@ -173,6 +181,7 @@ server.tool(
     description: z.string().optional().default("").describe("Issue description"),
     project: z.string().describe(`Project name (folder under ${PROJECTS_DIR}/)`),
   },
+  { destructiveHint: false },
   async ({ title, type, priority, description, project }) => ({
     content: [{ type: "text", text: await createIssue(VAULT_PATH, title, type, priority, description, project) }],
   })
@@ -189,6 +198,7 @@ server.tool(
     title: z.string().optional().describe("New title"),
     notes: z.string().optional().describe("Progress note to append"),
   },
+  { destructiveHint: false },
   async ({ project, id, status, priority, title, notes }) => ({
     content: [{ type: "text", text: await updateIssueStatus(VAULT_PATH, project, id, { status, priority, title, notes }) }],
   })
@@ -206,6 +216,7 @@ server.tool(
     priority: z.number().min(1).max(5).optional().describe("Show issues at this priority or higher (lower number = higher priority)"),
     project: z.string().optional().describe("Filter by project name"),
   },
+  { readOnlyHint: true },
   async ({ status, type, priority, project }) => ({
     content: [{ type: "text", text: await listFilteredIssues(VAULT_PATH, { status, type, priority, project }) }],
   })
