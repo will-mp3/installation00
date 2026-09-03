@@ -1,0 +1,5 @@
+interface:
+  display_name: "Using The Ark"
+  short_description: "How to find and use the Ark's skills"
+policy:
+  allow_implicit_invocation: false

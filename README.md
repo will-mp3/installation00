@@ -26,6 +26,12 @@ That's it. The script is idempotent — re-run it any time. It will:
 4. Symlink every skill into `~/.claude/skills` (Claude Code) and `~/.agents/skills` (Codex)
 5. Symlink `agents/AGENTS.global.md` to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` (existing real files are backed up to `.bak`)
 6. Register the MCP server with both harness CLIs
+7. Wire the SessionStart hook so every session loads `using-the-ark`
+
+**One manual step on a new machine:** Codex only runs hooks it has been told to trust, and
+that prompt exists solely in the interactive TUI — `codex exec` skips untrusted hooks
+silently. Start an interactive `codex` session once and approve the hook. Claude Code needs
+no equivalent step.
 
 Options:
 
@@ -48,10 +54,13 @@ skills/
   productivity/     # general workflow skills
 agents/
   AGENTS.global.md  # the shared global instructions file
+hooks/
+  codex-hooks.json  # symlinked to ~/.codex/hooks.json
 ```
 
 ## Daily use
 
 - New repo? Run `/init-agents` in a session — stamps a tailored `AGENTS.md` (+ `CLAUDE.md` symlink) from the repo's actual contents.
-- Feature work flows through the vault: `/grill-with-docs` → `/to-spec` → `/to-tickets` → `/implement`, with specs as project notes and tickets as vault issues.
+- Feature work flows through the skills: `brainstorming` → `writing-plans` → `executing-plans`, with specs under `docs/the-ark/specs/` and tickets as vault issues.
+- Every session opens with `skills/using-the-ark/SKILL.md` injected by the SessionStart hook, in both Claude Code and Codex. Edit that file to change how skills get invoked.
 - Edit a skill here, commit, `git pull` elsewhere — every machine and harness picks it up immediately.

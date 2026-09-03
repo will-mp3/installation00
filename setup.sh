@@ -57,4 +57,7 @@ fi
 # --- 6. Register the MCP server ---
 "$REPO/scripts/register-mcp.sh"
 
+# --- 7. Wire the SessionStart hook into both harnesses ---
+"$REPO/scripts/link-hooks.sh"
+
 log "setup complete"

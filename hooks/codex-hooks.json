@@ -1,0 +1,18 @@
+{
+  "description": "The Ark — inject the using-the-ark skill at session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.codex/ark-session-start",
+            "statusMessage": "Loading the Ark",
+            "additionalContextLimit": 8000
+          }
+        ]
+      }
+    ]
+  }
+}
