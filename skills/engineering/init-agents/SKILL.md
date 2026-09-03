@@ -38,6 +38,6 @@ Read `templates/default.md` (in this skill's directory) and fill it in. Rules:
 
 ### 5. Link the vault
 
-If the Obsidian MCP is connected, check whether this repo has a vault project (`search_vault` / `list_notes` on the projects folder). If it does, make sure the AGENTS.md's Vault section names it. If not, offer to `create_project` — don't create one unbidden.
+If the memory-layer MCP is connected, check whether this repo has a vault project (`search_vault` / `list_notes` on the projects folder). If it does, make sure the AGENTS.md's Vault section names it. If not, offer to `create_project` — don't create one unbidden.
 
 Show the user the final file.

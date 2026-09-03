@@ -23,22 +23,16 @@ for arg in "$@"; do
 done
 [ "$DRY_RUN" = "1" ] && log "dry run — no changes will be made"
 
-# --- 1. Prerequisites ---
-command -v git >/dev/null 2>&1 || { err "git is required"; exit 1; }
-command -v node >/dev/null 2>&1 || { err "Node.js 18+ is required (https://nodejs.org or 'brew install node')"; exit 1; }
-node_major="$(node -e 'process.stdout.write(String(process.versions.node.split(".")[0]))')"
-if [ "$node_major" -lt 18 ]; then
-  err "Node.js 18+ required, found $(node --version)"
-  exit 1
-fi
-log "prerequisites ok (node $(node --version))"
+# --- 1. Prerequisites: Homebrew and Node, installed if missing ---
+# Sourced, not executed, so the brew PATH it sets reaches the later steps.
+. "$REPO/scripts/bootstrap-deps.sh"
 
 # --- 2. Build the MCP server ---
 log "building MCP server"
 if [ "$DRY_RUN" = "1" ]; then
-  printf '\033[2m[dry-run]\033[0m npm install && npm run build (in mcp/obsidian)\n'
+  printf '\033[2m[dry-run]\033[0m npm install && npm run build (in mcp/memory-layer)\n'
 else
-  (cd "$REPO/mcp/obsidian" && npm install --no-fund --no-audit --silent && npm run build --silent)
+  (cd "$REPO/mcp/memory-layer" && npm install --no-fund --no-audit --silent && npm run build --silent)
 fi
 
 # --- 3. Ollama (never fatal) ---
@@ -59,5 +53,8 @@ fi
 
 # --- 7. Wire the SessionStart hook into both harnesses ---
 "$REPO/scripts/link-hooks.sh"
+
+# --- 8. Wire the status line (Claude Code only — Codex has none) ---
+"$REPO/scripts/link-statusline.sh"
 
 log "setup complete"

@@ -71,5 +71,5 @@ CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 if [ "${DRY_RUN:-0}" = "1" ]; then
   printf '\033[2m[dry-run]\033[0m merge the ark SessionStart hook into %s\n' "$CLAUDE_SETTINGS"
 else
-  node "$REPO/scripts/merge-claude-hook.mjs" "$CLAUDE_SETTINGS"
+  node "$REPO/scripts/merge-claude-settings.mjs" --hook "$CLAUDE_SETTINGS"
 fi

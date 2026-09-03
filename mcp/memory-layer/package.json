@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-mcp-server",
+  "name": "memory-layer-mcp",
   "version": "1.0.0",
-  "description": "",
+  "description": "MCP server giving agents persistent, token-efficient access to a markdown knowledge store",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",

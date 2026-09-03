@@ -163,7 +163,7 @@ is the whole process.
 
 **Understanding the idea:**
 
-- Search the Obsidian vault, then inspect the current project state (files, docs, recent commits). Read `docs/BEST_PRACTICES.md` when it exists.
+- Search the memory layer, then inspect the current project state (files, docs, recent commits). Read `docs/BEST_PRACTICES.md` when it exists.
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea

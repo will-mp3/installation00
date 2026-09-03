@@ -1,6 +1,12 @@
-# Obsidian MCP Server
+# memory-layer
 
-A Node.js MCP server that gives coding agents persistent, token-efficient access to any Obsidian vault. Includes hybrid full-text + semantic search and built-in issue tracking.
+A Node.js MCP server that gives coding agents persistent, token-efficient access to a
+directory of markdown files. Hybrid full-text + semantic search, plus built-in issue tracking.
+
+Nothing here is Obsidian-specific — the server reads and writes plain `.md` files with
+optional YAML frontmatter, so any markdown store works: an Obsidian vault, a Logseq graph,
+a docs folder, a bare git repo of notes. "Vault" below just means "the directory you
+pointed `VAULT_PATH` at".
 
 ## Prerequisites
 
@@ -25,11 +31,11 @@ Add the server to your MCP configuration. Create a `.mcp.json` file in your proj
 ```json
 {
   "mcpServers": {
-    "obsidian": {
+    "memory-layer": {
       "command": "node",
-      "args": ["/absolute/path/to/the-ark/mcp/obsidian/dist/server.js"],
+      "args": ["/absolute/path/to/the-ark/mcp/memory-layer/dist/server.js"],
       "env": {
-        "VAULT_PATH": "/absolute/path/to/your/obsidian/vault"
+        "VAULT_PATH": "/absolute/path/to/your/markdown/store"
       }
     }
   }
@@ -41,11 +47,11 @@ For development, you can use `tsx` to run TypeScript directly without building:
 ```json
 {
   "mcpServers": {
-    "obsidian": {
+    "memory-layer": {
       "command": "npx",
-      "args": ["tsx", "/absolute/path/to/the-ark/mcp/obsidian/src/server.ts"],
+      "args": ["tsx", "/absolute/path/to/the-ark/mcp/memory-layer/src/server.ts"],
       "env": {
-        "VAULT_PATH": "/absolute/path/to/your/obsidian/vault"
+        "VAULT_PATH": "/absolute/path/to/your/markdown/store"
       }
     }
   }
@@ -55,7 +61,7 @@ For development, you can use `tsx` to run TypeScript directly without building:
 **Important:**
 - Use absolute paths for both the server script and `VAULT_PATH`
 - `VAULT_PATH` must point to an existing directory — the server will exit immediately if it is missing or invalid
-- One server instance per vault
+- One server instance per store
 
 ### Configuration
 
@@ -131,7 +137,7 @@ If Ollama is unavailable, the server falls back to FTS5-only search automaticall
 ### Issue Tracking
 
 Issues are dual-stored:
-- **Markdown note** in `<PROJECTS_DIR>/<project>/issues/` — browsable in Obsidian, includes frontmatter metadata and a notes log. Kept in sync when issues are updated.
+- **Markdown note** in `<PROJECTS_DIR>/<project>/issues/` — browsable in any markdown editor, includes frontmatter metadata and a notes log. Kept in sync when issues are updated.
 - **SQLite table** in `.vault-index.db` — enables fast structured queries (filter by status, priority, type, project)
 
 ### Security

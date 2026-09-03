@@ -26,7 +26,7 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Search The Vault First
 
-The Obsidian vault is the memory that outlives this session. Before acting on a task or question, `search_vault` for prior decisions, specs, issues, and research — then build on what you find instead of starting cold. Capture what you learn as you go, not just at the end.
+The memory layer is the memory that outlives this session. Before acting on a task or question, `search_vault` for prior decisions, specs, issues, and research — then build on what you find instead of starting cold. Capture what you learn as you go, not just at the end.
 
 ## Skill Priority
 

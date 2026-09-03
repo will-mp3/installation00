@@ -25,7 +25,7 @@ if (!fs.existsSync(VAULT_PATH)) {
 }
 
 const server = new McpServer({
-  name: "obsidian-vault",
+  name: "memory-layer",
   version: "1.0.0",
 });
 

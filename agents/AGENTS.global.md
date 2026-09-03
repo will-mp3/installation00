@@ -1,8 +1,10 @@
 # Global Agent Instructions
 
-## Obsidian Brain
+## Memory Layer
 
-I have a personal knowledge vault managed via an Obsidian MCP server. The vault lives at `~/Documents/brain/`.
+I have a personal knowledge vault served by the `memory-layer` MCP server. The vault lives at
+`~/Documents/brain/` — a plain directory of markdown files, browsable in Obsidian but not
+dependent on it.
 
 ### Search-First Workflow (CRITICAL)
 

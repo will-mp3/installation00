@@ -24,4 +24,4 @@
 
 ## Vault
 
-This repo's knowledge lives in the Obsidian vault project `<project>` — search it before starting work (`search_vault`); track bugs and tasks there (`create_issue` / `list_issues`).
+This repo's knowledge lives in the memory-layer vault project `<project>` — search it before starting work (`search_vault`); track bugs and tasks there (`create_issue` / `list_issues`).

@@ -4,9 +4,10 @@ The Ark: Halo ring (agent harness) factory. Primary function is to destroy flood
 
 Dotfiles for agent tooling. One repo that puts the same setup on every machine, for every harness:
 
-- **Obsidian MCP server** (`mcp/obsidian/`) — persistent, token-efficient vault access with hybrid search and issue tracking
+- **memory-layer MCP server** (`mcp/memory-layer/`) — persistent, token-efficient access to a markdown knowledge store, with hybrid search and issue tracking
 - **Skills** (`skills/`) — a curated engineering + productivity skill set, wired to the vault
 - **Global instructions** (`agents/AGENTS.global.md`) — one harness-neutral file serving Claude Code and Codex
+- **Status line** (`statusline/statusline.sh`) — branch, model, context and rate-limit bars, in both harnesses
 
 Both harnesses run the *same files* from this checkout via symlinks — `git pull` updates everything, everywhere, at once.
 
@@ -20,7 +21,7 @@ cd the-ark
 
 That's it. The script is idempotent — re-run it any time. It will:
 
-1. Check prerequisites (Node 18+, git)
+1. Install Homebrew and Node 18+ if they're missing (git you already have — you cloned this)
 2. Build the MCP server
 3. Install Ollama, install a launchd agent that keeps it running, and pull the embedding model
    (never fatal — search degrades to FTS-only without it)
@@ -28,6 +29,7 @@ That's it. The script is idempotent — re-run it any time. It will:
 5. Symlink `agents/AGENTS.global.md` to `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` (existing real files are backed up to `.bak`)
 6. Register the MCP server with both harness CLIs
 7. Wire the SessionStart hook so every session loads `using-the-ark`
+8. Wire the status line into both harnesses
 
 **One manual step on a new machine:** Codex only runs hooks it has been told to trust, and
 that prompt exists solely in the interactive TUI — `codex exec` skips untrusted hooks
@@ -49,7 +51,7 @@ After setup, restart your agent sessions to pick up the MCP server. Skills and i
 ```
 setup.sh            # the one command a fresh machine runs
 scripts/            # the steps setup.sh orchestrates (each independently runnable)
-mcp/obsidian/       # MCP server source (see its README for tools and config)
+mcp/memory-layer/   # MCP server source (see its README for tools and config)
 skills/
   engineering/      # design, planning, implementation, review skills
   productivity/     # general workflow skills
@@ -57,6 +59,9 @@ agents/
   AGENTS.global.md  # the shared global instructions file
 hooks/
   codex-hooks.json  # symlinked to ~/.codex/hooks.json
+statusline/
+  statusline.sh     # symlinked to ~/.claude/ark-statusline (Codex gets an item
+                    # list in config.toml instead — see Status line)
 ```
 
 ## Search uptime
@@ -83,9 +88,51 @@ launchctl print gui/$(id -u)/com.the-ark.ollama | grep -E 'state|pid'
 tail -f ~/Library/Logs/the-ark-ollama.log
 ```
 
+## Status line
+
+Both harnesses show `branch · model · context · 5-hour limit`. This is the one piece of the ark
+that cannot be a single shared file, because the two take opposite shapes.
+
+**Claude Code** runs an arbitrary command and renders its stdout, so it gets
+`statusline/statusline.sh` — `branch | model | ctx: [bar] % | rate: [bar] %`, bars going green →
+yellow → red as they fill. `setup.sh` symlinks it to `~/.claude/ark-statusline` and points
+`settings.json` at that shim, so edits ship on `git pull` without re-running setup. An existing
+*custom* `statusLine` is left alone and reported rather than overwritten.
+
+Its one dependency is `jq`, which macOS has shipped at `/usr/bin/jq` since Ventura. Without it
+the line degrades to a visible reminder instead of rendering blank.
+
+**Codex** has no command hook. Its status line is a picker over a fixed vocabulary of items,
+chosen with `/statusline` in the TUI and stored as `[tui].status_line` in `config.toml`. So it
+cannot run the script; `setup.sh` writes the item set that renders the same four fields:
+
+```toml
+[tui]
+status_line = ["git-branch", "model", "context-used", "five-hour-limit"]
+```
+
+A `status_line` you have already set is never overwritten. The vocabulary is much larger than
+the four above — `context-remaining`, `weekly-limit`, `used-tokens`, `task-progress`,
+`thread-credits`, `estimated-thread-cost`, `approval-mode`, `fast-mode`, `pull-request-number`
+and more. Run `/statusline` to browse and change it; the same ids also drive `[tui].terminal_title`.
+
+## Upgrading from the `obsidian` name
+
+The MCP server used to be called `obsidian`. Nothing in it was ever Obsidian-specific — it
+reads and writes plain markdown — so it is now `memory-layer`. Re-running `setup.sh` moves you
+over: the old registration is removed from both harnesses before the new one is added.
+
+Two things it will not touch, and warns about instead, because they are your config:
+
+- `mcp__obsidian__*` permission rules in `~/.claude/settings.json` — tool ids are namespaced by
+  server name, so these are now `mcp__memory-layer__*`.
+- `[mcp_servers.obsidian.tools.*]` approval blocks in `~/.codex/config.toml` — `codex mcp
+  remove` drops the server table but leaves these behind.
+
 ## Daily use
 
 - New repo? Run `/init-agents` in a session — stamps a tailored `AGENTS.md` (+ `CLAUDE.md` symlink) from the repo's actual contents.
 - Feature work flows through the skills: `brainstorming` → `writing-plans` → `executing-plans`, with specs under `docs/the-ark/specs/` and tickets as vault issues.
 - Every session opens with `skills/using-the-ark/SKILL.md` injected by the SessionStart hook, in both Claude Code and Codex. Edit that file to change how skills get invoked.
 - Edit a skill here, commit, `git pull` elsewhere — every machine and harness picks it up immediately.
+- Same for the status line: edit `statusline/statusline.sh` and the next render picks it up.
